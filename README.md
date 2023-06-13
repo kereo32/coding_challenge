@@ -30,10 +30,11 @@ API documentation : [Documentation](https://www.figma.com/file/hkTHqBGv4FnRb18xB
 3. Must be Visa / Master card type
 4. Must be valid expiration date
 5. Must be valid CVV
-6. Complete the API integration:
-7. Call the web service for payment submission
-8. Match the UI for Checkout item:
-9. Display the icon (Visa/Master) based on card number input
+6. Display the cart items on the checkout page
+7. Complete the API integration:
+8. Call the web service for payment submission
+9. Match the UI for Checkout item:
+10. Display the icon (Visa/Master) based on card number input
 
 ## Complete the Challenge
 
