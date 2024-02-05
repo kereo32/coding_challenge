@@ -21,7 +21,7 @@ To install the project and get it started, you have to perform the following ste
 
 Figma File : [File](https://www.figma.com/file/hkTHqBGv4FnRb18xBJMDVD/fe-code-challenge-ep1?node-id=0%3A1&t=scLp0ML2yo3CQrM0-0)
 
-API documentation : [Documentation](https://www.figma.com/file/hkTHqBGv4FnRb18xBJMDVD/fe-code-challenge-ep1?node-id=0%3A1&t=scLp0ML2yo3CQrM0-0)
+API documentation : [Documentation](https://documenter.getpostman.com/view/48504/UVysxbAk)
 
 ## Requirements
 
