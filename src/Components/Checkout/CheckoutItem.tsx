@@ -10,7 +10,7 @@ export default function CheckoutItem(props: ProductProps) {
     <Grid container display='flex' flexDirection='row'>
       <Grid item xs={10}>
         <Typography variant='body2' fontWeight={800}>
-          {props.holder.product.name}
+          {`${props.holder.product.name}(${props.holder.product.price} TBH) ${props.holder.quantity}`}
         </Typography>
       </Grid>
     </Grid>

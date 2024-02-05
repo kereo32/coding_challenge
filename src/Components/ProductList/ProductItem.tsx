@@ -1,16 +1,21 @@
 import { Avatar, Box, Grid, Typography } from '@mui/material'
-import { Product } from '../../Types/Product'
+import { Product, ProductsCheckout } from '../../Types/Product'
 import IndeterminateCheckBoxOutlinedIcon from '@mui/icons-material/IndeterminateCheckBoxOutlined'
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined'
 import theme from '../../theme'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface ProductProps {
   product: Product
+  updateCheckout: (checkoutProduct: ProductsCheckout) => void
 }
 
-export default function ProductItem(props: ProductProps) {
+export default function ProductItem({ product, updateCheckout }: ProductProps) {
   const [quantity, setQuantity] = useState<number>(0)
+
+  useEffect(() => {
+    updateCheckout({ product: product, quantity: quantity })
+  }, [quantity])
 
   return (
     <Grid
@@ -29,7 +34,7 @@ export default function ProductItem(props: ProductProps) {
       }}
     >
       <Avatar
-        alt={props.product.name}
+        alt={product.name}
         sx={{
           backgroundColor: 'white',
           border: '4px solid #6A52FF',
@@ -38,15 +43,15 @@ export default function ProductItem(props: ProductProps) {
         }}
       />
       <Typography variant='body2' fontWeight={800}>
-        {props.product.name}
+        {product.name}
       </Typography>
 
       <Grid display='flex' flexDirection='row' gap={1}>
         <Typography color='primary' variant='caption'>
-          {props.product.price}
+          {product.price}
         </Typography>
         <Typography color='primary' variant='caption'>
-          {props.product.currency}
+          {product.currency}
         </Typography>
       </Grid>
 

@@ -1,26 +1,96 @@
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  Alert,
+  Grid,
+  Typography,
+  TextField,
+  InputAdornment,
   Box,
   Button,
-  Grid,
-  InputAdornment,
   Snackbar,
-  TextField,
-  Typography,
-} from '@mui/material'
-import { useState } from 'react'
-import theme from '../../theme'
+  Alert,
+} from '@mui/material';
+import theme from '../../theme';
+import { useNavigate } from 'react-router-dom';
+import { useCheckoutProductsState } from '../context/context';
+import { ProductsCheckout, CreditCardValues, Payment } from '../../Types/Product';
+import CheckoutItem from './CheckoutItem';
+import Validator, { ErrorKeys } from '../../Helpers/Validator';
+import Formatter, { FormatterInterface } from '../../Helpers/Formatter';
+import { ProductHttpService } from '../../Http/Products.http.service'
+import { AxiosResponse } from 'axios';
+
 
 export default function Checkout() {
-  const [displayResponse, setDisplayResponse] = useState<boolean>()
+  const navigate = useNavigate();
+  const [displayResponse, setDisplayResponse] = useState<boolean>(false);
+  const { checkoutProducts } = useCheckoutProductsState() || {};
+  const inputRefs: React.RefObject<HTMLInputElement>[] = Array.from(
+    { length: 4 },
+    () => useRef<HTMLInputElement>(null)
+  );
+  const formatters = useRef<FormatterInterface[]>([]);
 
-  const onSubmit = async () => {
-    // Validate and submit data ......
-  }
+  const [controlledFormValues, setControlledFormValues] =
+    useState<CreditCardValues>({
+      email: '',
+      cardNumber: '',
+      cardDate: '',
+      cardCvc: '',
+    });
+
+  const [validationErrors, setValidationErrors] = useState<ErrorKeys | null>(null)
+  const validator = new Validator(controlledFormValues);
+
+  const handleStateValueChange = (key: string, value: string): void => {
+    setControlledFormValues((prevState: CreditCardValues) => ({
+      ...prevState,
+      [key]: value,
+    }));
+  };
+
+  useEffect(() => {
+    formatters.current = inputRefs
+      .filter((ref) => ref.current !== null)
+      .map((ref) => new Formatter(ref.current!));
+
+    return () => formatters.current.forEach((formatter) => formatter.cleanUp());
+  }, []);
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    validator.validate()
+    setValidationErrors(validator.errors)
+    if (validator.allNull() && checkoutProducts) {
+      const paymentProducts = checkoutProducts.map((product: ProductsCheckout) => ({ quantity: product.quantity, id: product.product.id }))
+      const payment: Payment = {
+        requestId: '12344556',
+        paymentInfo: {
+          email: controlledFormValues.email.trim().toString(),
+          cardInfo: {
+            cardNo: controlledFormValues.cardNumber.trim().split('-').join('').toString(),
+            cardExpiryDate: controlledFormValues.cardDate,
+            cardCVV: controlledFormValues.cardCvc.toString()
+          },
+        },
+        products: paymentProducts
+      }
+      ProductHttpService.buyProducts(payment).then((res: AxiosResponse) => {
+        if (res.status >= 200 && res.status <= 299) {
+          navigate('/thanks')
+        }
+      })
+    }
+
+  };
 
   const getTotalCost = (): number => {
-    return 0
-  }
+    let total = 0;
+    checkoutProducts?.forEach((product: ProductsCheckout) => {
+      total += product.product.price * product.quantity;
+    });
+
+    return total;
+  };
 
   return (
     <Grid container display='flex' justifyContent='center'>
@@ -41,40 +111,80 @@ export default function Checkout() {
             Checkout
           </Typography>
         </Grid>
-        <form onSubmit={onSubmit} style={{ maxWidth: '450px' }}>
+        <Grid container spacing={2}>
+          {checkoutProducts && checkoutProducts.map((checkoutProduct: ProductsCheckout, index: number) => {
+            return <CheckoutItem key={index} holder={checkoutProduct} />;
+          })}
+        </Grid>
+        <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => onSubmit(e)} style={{ maxWidth: '450px' }}>
           <Grid xs={12} item display='flex' flexDirection='column' gap={2} mt={4}>
             <Typography fontWeight={800}>Email</Typography>
-            <TextField id='email' variant='outlined' />
+            <TextField
+              inputRef={inputRefs[0]}
+              onChange={() => handleStateValueChange('email', formatters.current !== null ? formatters.current[0].formattedText : '')}
+              placeholder='email@domain.com'
+              value={controlledFormValues.email}
+              id='email'
+              variant='outlined'
+            />
+            {validationErrors?.email && <Typography color='error'>{validationErrors.email}</Typography>}
             <Typography fontWeight={800}>Card Information</Typography>
             <TextField
               id='cardNumber'
+              inputRef={inputRefs[1]}
               variant='outlined'
+              placeholder='____-____-____-____'
+              onChange={() => handleStateValueChange('cardNumber', formatters.current !== null ? formatters.current[1].formattedText : '')}
+              inputProps={{
+                maxLength: 19,
+              }}
+              value={controlledFormValues.cardNumber}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position='end'>
                     (
-                    <Box component='img' ml={1} src='mastercard.svg' sx={{ width: '20px' }} />
-                    <Box component='img' src='visa.svg' sx={{ width: '20px' }} />)
+                    <Box
+                      display={formatters.current[1] && formatters.current[1].cardType === 'Visa' ? 'none' : 'initial'}
+                      component='img'
+                      ml={1}
+                      src='mastercard.svg'
+                      sx={{ width: '20px' }}
+                    />
+                    <Box
+                      display={formatters.current[1] && formatters.current[1].cardType === 'MasterCard' ? 'none' : 'initial'}
+                      component='img'
+                      src='visa.svg'
+                      sx={{ width: '20px' }}
+                    />
                   </InputAdornment>
                 ),
               }}
             />
-
+            {validationErrors?.cardNumber && <Typography color='error'>{validationErrors.cardNumber}</Typography>}
             <Grid container>
               <Grid xs={6} item>
                 <TextField
                   id='cardDate'
+                  placeholder='MM/YY'
                   variant='outlined'
+                  value={controlledFormValues.cardDate}
+                  inputRef={inputRefs[2]}
+                  onChange={() => handleStateValueChange('cardDate', formatters.current !== null ? formatters.current[2].formattedText : '')}
                   fullWidth
                   inputProps={{
                     maxLength: 5,
                   }}
                 />
+                {validationErrors?.date && <Typography color='error'>{validationErrors.date}</Typography>}
               </Grid>
               <Grid xs={6} item>
                 <TextField
                   id='cardCvc'
+                  placeholder='___'
+                  value={controlledFormValues.cardCvc}
                   variant='outlined'
+                  inputRef={inputRefs[3]}
+                  onChange={() => handleStateValueChange('cardCvc', formatters.current !== null ? formatters.current[3].formattedText : '')}
                   fullWidth
                   inputProps={{
                     maxLength: 3,
@@ -87,6 +197,7 @@ export default function Checkout() {
                     ),
                   }}
                 />
+                {validationErrors?.cvcNumber && <Typography color='error'>{validationErrors.cvcNumber}</Typography>}
               </Grid>
             </Grid>
             <Grid xs={12} item justifyContent='center' display='flex' mt={4}>
@@ -97,7 +208,6 @@ export default function Checkout() {
           </Grid>
         </form>
       </Grid>
-
       <Snackbar
         open={displayResponse}
         autoHideDuration={6000}
@@ -106,5 +216,5 @@ export default function Checkout() {
         <Alert severity='error'>Something went wrong. Please try again.</Alert>
       </Snackbar>
     </Grid>
-  )
+  );
 }

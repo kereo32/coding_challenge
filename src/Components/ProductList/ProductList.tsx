@@ -7,9 +7,11 @@ import Grid from '@mui/material/Grid'
 import { Badge, Button, Typography } from '@mui/material'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
 import { NavLink } from 'react-router-dom'
+import { useCheckoutProductsDispatch } from '../context/context'
 
 export default function ProductList() {
   const [products, setProducts] = useState<Product[]>([])
+  const { updateCheckoutProducts } = useCheckoutProductsDispatch() || {}
 
   useEffect(() => {
     ProductHttpService.getProducts().then((data: ProductsResponse) => {
@@ -25,7 +27,7 @@ export default function ProductList() {
       <Box display='flex' justifyContent='center' flexDirection='row' mt={12}>
         <Grid xs={6} container item>
           {products.map((product, index) => (
-            <ProductItem key={index} product={product} />
+            <ProductItem updateCheckout={updateCheckoutProducts!} key={index} product={product} />
           ))}
         </Grid>
       </Box>
