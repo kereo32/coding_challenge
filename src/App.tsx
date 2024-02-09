@@ -1,6 +1,6 @@
 import ProductList from './Components/ProductList/ProductList'
 import './App.css'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Checkout from './Components/Checkout/Checkout'
 import SuccessPage from './Components/SuccessPage/Success'
 import { CheckoutContextStateProvider } from './Components/context/context'
@@ -8,6 +8,11 @@ import { useState } from 'react'
 import { ProductsCheckout } from './Types/Product'
 function App() {
   const [checkoutProducts, setCheckoutProducts] = useState<ProductsCheckout[]>([])
+
+  const ProtectedRoute = ({ element, checkoutProducts }: any) => {
+    const isEmpty = checkoutProducts.length === 0;
+    return isEmpty ? <Navigate to="/" /> : element;
+  };
 
   function updateCheckoutProducts(checkoutProduct: ProductsCheckout): void {
     setCheckoutProducts((prevState: ProductsCheckout[]) => {
@@ -36,8 +41,9 @@ function App() {
           <main className='App'>
             <Routes>
               <Route path='/' element={<ProductList />} />
-              <Route path='/checkout' element={<Checkout />} />
-              <Route path='/thanks' element={<SuccessPage />} />
+              <Route path='/checkout' element={<ProtectedRoute element={<Checkout />} checkoutProducts={checkoutProducts} />} />
+              <Route path='/thanks' element={<ProtectedRoute element={<SuccessPage />} checkoutProducts={checkoutProducts} />} />
+              <Route path='*' element={<Navigate to="/" />} />
             </Routes>
           </main>
         </Router>
