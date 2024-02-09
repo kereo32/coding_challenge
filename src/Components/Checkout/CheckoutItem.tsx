@@ -1,18 +1,28 @@
-import { Grid, Typography } from '@mui/material'
-import { ProductsCheckout } from '../../Types/Product'
+import { Grid, Typography } from '@mui/material';
+import { ProductsCheckout } from '../../Types/Product';
 
 interface ProductProps {
-  holder: ProductsCheckout
+  holder: ProductsCheckout;
 }
 
 export default function CheckoutItem(props: ProductProps) {
   return (
-    <Grid container display='flex' flexDirection='row'>
-      <Grid item xs={10}>
+    <Grid container display='flex' flexDirection='column' justifyContent='space-evenly'>
+      <Grid item xs={12}>
         <Typography variant='body2' fontWeight={800}>
-          {`${props.holder.product.name}(${props.holder.product.price} TBH) ${props.holder.quantity}`}
+          {`${props.holder.product.name}`}
+        </Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant='body2' fontWeight={400}>
+          {props.holder.product.price} TBH
+        </Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant='body2' fontWeight={200}>
+          Quantity: {props.holder.quantity}
         </Typography>
       </Grid>
     </Grid>
-  )
+  );
 }

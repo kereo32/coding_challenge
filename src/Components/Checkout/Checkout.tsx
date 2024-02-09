@@ -69,7 +69,7 @@ export default function Checkout() {
       try {
         const res = await ProductHttpService.buyProducts(payment);
         if (res.status >= 200 && res.status <= 299) {
-          navigate('/thanks')
+          navigate('/thanks', { state: { successPageProps: payment.products } })
         }
       } catch (error) {
         setDisplayResponse(true)
@@ -100,9 +100,11 @@ export default function Checkout() {
           </Typography>
         </Grid>
         <Grid container spacing={2}>
-          {checkoutProducts && checkoutProducts.map((checkoutProduct: ProductsCheckout, index: number) => {
-            return <CheckoutItem key={index} holder={checkoutProduct} />;
-          })}
+          {checkoutProducts && checkoutProducts.map((checkoutProduct: ProductsCheckout, index: number) => (
+            <Grid item key={index}>
+              <CheckoutItem holder={checkoutProduct} />
+            </Grid>
+          ))}
         </Grid>
         <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => onSubmit(e)} style={{ maxWidth: '450px' }}>
           <Grid xs={12} item display='flex' flexDirection='column' gap={2} mt={4}>

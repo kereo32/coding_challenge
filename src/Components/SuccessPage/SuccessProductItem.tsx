@@ -7,9 +7,15 @@ interface ProductProps {
 
 export default function SuccessProductItem(props: ProductProps) {
   return (
-    <Grid container display='flex' flexDirection='row' alignItems='center'>
+    <Grid container display='flex' flexDirection='column' alignItems='center'>
       <Typography variant='body2' fontWeight={800}>
         {props.holder.product.name}
+      </Typography>
+      <Typography variant='body2' fontWeight={800}>
+        {props.holder.product.price} TBH
+      </Typography>
+      <Typography variant='body2' fontWeight={800}>
+        Quantity : {props.holder.quantity}
       </Typography>
     </Grid>
   )

@@ -1,7 +1,11 @@
 import { Grid, Typography } from '@mui/material'
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined'
+import SuccessProductItem from './SuccessProductItem'
+import { useCheckoutProductsState } from '../context/context'
+import { ProductsCheckout } from '../../Types/Product'
 
 export default function SuccessPage() {
+  const { checkoutProducts } = useCheckoutProductsState() || {};
   return (
     <Grid container display='flex' justifyContent='center'>
       <Grid display='flex' flexDirection='column' gap={2} mt={16} maxWidth={'700px'}>
@@ -17,6 +21,13 @@ export default function SuccessPage() {
           <Typography align='center' variant='body2' color='text.secondary'>
             Thank you for shopping with us
           </Typography>
+        </Grid>
+        <Grid container alignItems="center" spacing={2}>
+          {checkoutProducts && checkoutProducts.map((product: ProductsCheckout, index: number) => (
+            <Grid item key={index}>
+              <SuccessProductItem holder={product} />
+            </Grid>
+          ))}
         </Grid>
       </Grid>
     </Grid>
