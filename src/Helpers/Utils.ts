@@ -12,7 +12,7 @@ export function constructPayment(checkoutProducts: ProductsCheckout[], controlle
       email: controlledFormValues.email.trim(),
       cardInfo: {
         cardNo: controlledFormValues.cardNumber.replace(/-/g, ''),
-        cardExpiryDate: controlledFormValues.cardDate.replace('/', ''),
+        cardExpiryDate: controlledFormValues.cardDate,
         cardCVV: controlledFormValues.cardCvc
       }
     },
