@@ -5,7 +5,7 @@ export function getTotalCost(products: ProductsCheckout[]): number {
   return parseFloat(totalCost.toFixed(2));
 }
 export function constructPayment(checkoutProducts: ProductsCheckout[], controlledFormValues: CreditCardValues): Payment {
-  const paymentProducts = checkoutProducts.map((product: ProductsCheckout) => ({ quantity: product.quantity, id: product.product.id }));
+  const paymentProducts = checkoutProducts.map((product: ProductsCheckout) => ({ quantity: product.quantity, id: product.product.id.toString() }));
   const payment: Payment = {
     requestId: '12344556',
     paymentInfo: {

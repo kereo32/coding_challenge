@@ -39,7 +39,7 @@ export interface Payment {
 }
 
 export interface PaymentProduct {
-  id: number
+  id: string
   quantity: number
 }
 
