@@ -8,22 +8,25 @@ import {
   Button,
   Snackbar,
   Alert,
+  CircularProgress
 } from '@mui/material';
 import theme from '../../theme';
 import { useNavigate } from 'react-router-dom';
 import { useCheckoutProductsState } from '../context/context';
-import { ProductsCheckout, CreditCardValues, Payment } from '../../Types/Product';
+import { ProductsCheckout, CreditCardValues } from '../../Types/Product';
 import CheckoutItem from './CheckoutItem';
 import Validator, { ErrorKeys } from '../../Helpers/Validator';
 import Formatter, { FormatterInterface } from '../../Helpers/Formatter';
 import { ProductHttpService } from '../../Http/Products.http.service'
-import { AxiosResponse } from 'axios';
+import { getTotalCost, constructPayment } from '../../Helpers/Utils'
 
 
 export default function Checkout() {
   const navigate = useNavigate();
   const [displayResponse, setDisplayResponse] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const { checkoutProducts } = useCheckoutProductsState() || {};
+
   const inputRefs: React.RefObject<HTMLInputElement>[] = Array.from(
     { length: 4 },
     () => useRef<HTMLInputElement>(null)
@@ -58,39 +61,24 @@ export default function Checkout() {
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading((prevState) => !prevState)
     validator.validate()
     setValidationErrors(validator.errors)
     if (validator.allNull() && checkoutProducts) {
-      const paymentProducts = checkoutProducts.map((product: ProductsCheckout) => ({ quantity: product.quantity, id: product.product.id }))
-      const payment: Payment = {
-        requestId: '12344556',
-        paymentInfo: {
-          email: controlledFormValues.email.trim().toString(),
-          cardInfo: {
-            cardNo: controlledFormValues.cardNumber.trim().split('-').join('').toString(),
-            cardExpiryDate: controlledFormValues.cardDate,
-            cardCVV: controlledFormValues.cardCvc.toString()
-          },
-        },
-        products: paymentProducts
-      }
-      ProductHttpService.buyProducts(payment).then((res: AxiosResponse) => {
+      const payment = constructPayment(checkoutProducts!, controlledFormValues);
+      try {
+        const res = await ProductHttpService.buyProducts(payment);
         if (res.status >= 200 && res.status <= 299) {
           navigate('/thanks')
         }
-      })
+      } catch (error) {
+        setDisplayResponse(true)
+      } finally {
+        setIsLoading((prevState) => !prevState)
+      }
     }
-
   };
 
-  const getTotalCost = (): number => {
-    let total = 0;
-    checkoutProducts?.forEach((product: ProductsCheckout) => {
-      total += product.product.price * product.quantity;
-    });
-
-    return total;
-  };
 
   return (
     <Grid container display='flex' justifyContent='center'>
@@ -201,9 +189,10 @@ export default function Checkout() {
               </Grid>
             </Grid>
             <Grid xs={12} item justifyContent='center' display='flex' mt={4}>
-              <Button variant='contained' color='secondary' type='submit'>
-                Pay {getTotalCost()} TBH
-              </Button>
+              {isLoading ? <CircularProgress /> :
+                <Button variant='contained' color='secondary' type='submit'>
+                  Pay {getTotalCost(checkoutProducts ? checkoutProducts : [])} TBH
+                </Button>}
             </Grid>
           </Grid>
         </form>
