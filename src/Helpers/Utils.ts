@@ -1,8 +1,8 @@
 import { ProductsCheckout,Payment,CreditCardValues} from '../Types/Product';
 
-export function getTotalCost(products : ProductsCheckout[]) : number {
-  return products?.reduce((total, product) => total + product.product.price * product.quantity, 0) || 0;
-
+export function getTotalCost(products: ProductsCheckout[]): number {
+  const totalCost = products.reduce((total, product) => total + product.product.price * product.quantity, 0);
+  return parseFloat(totalCost.toFixed(2));
 }
 export function constructPayment(checkoutProducts: ProductsCheckout[], controlledFormValues: CreditCardValues): Payment {
   const paymentProducts = checkoutProducts.map((product: ProductsCheckout) => ({ quantity: product.quantity, id: product.product.id }));
